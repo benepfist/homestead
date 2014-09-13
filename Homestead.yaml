@@ -9,7 +9,7 @@ folders:
 
 sites:
     - map: homestead.app
-      to: /home/vagrant/Code/Laravel/public
+      to: /home/vagrant/Code/app/public
 
 variables:
     - key: APP_ENV
