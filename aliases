@@ -5,6 +5,8 @@ alias h='cd ~'
 alias c='clear'
 
 alias homposer='hhvm /usr/local/bin/composer'
+alias phpunit="./vendor/bin/phpunit"
+alias phploc="./vendor/bin/phploc"
 
 function serve() {
 	if [[ "$1" && "$2" ]]
