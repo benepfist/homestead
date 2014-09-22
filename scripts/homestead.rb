@@ -19,6 +19,7 @@ class Homestead
     config.vm.network "forwarded_port", guest: 80, host: 8000
     config.vm.network "forwarded_port", guest: 3306, host: 33060
     config.vm.network "forwarded_port", guest: 5432, host: 54320
+    config.vm.network "forwarded_port", guest: 1080, host: 1080
 
     # Copy The Bash Aliases
     config.vm.provision "shell" do |s|
@@ -52,5 +53,11 @@ class Homestead
         end
       end
     end
+
+    # Run custom script
+    config.vm.provision "shell" do |s|
+      s.inline = "bash /vagrant/scripts/custom.sh"
+    end
+
   end
 end
