@@ -11,6 +11,9 @@ sites:
     - map: homestead.app
       to: /home/vagrant/Code/app/public
 
+databases:
+    - homestead
+
 variables:
     - key: APP_ENV
       value: local
