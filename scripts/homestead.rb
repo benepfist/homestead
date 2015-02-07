@@ -9,6 +9,7 @@ class Homestead
 
     # Configure A Few VirtualBox Settings
     config.vm.provider "virtualbox" do |vb|
+      vb.name = "homestead"
       vb.customize ["modifyvm", :id, "--memory", settings["memory"] ||= "2048"]
       vb.customize ["modifyvm", :id, "--cpus", settings["cpus"] ||= "1"]
       vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
@@ -22,6 +23,13 @@ class Homestead
     config.vm.network "forwarded_port", guest: 3306, host: 33060
     config.vm.network "forwarded_port", guest: 5432, host: 54320
     config.vm.network "forwarded_port", guest: 1080, host: 1080
+
+    # Add Custom Ports From Configuration
+    if settings.has_key?("ports")
+      settings["ports"].each do |port|
+        config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"] ||= "tcp"
+      end
+    end
 
     # Copy The Bash Aliases
     config.vm.provision "shell" do |s|
@@ -37,10 +45,10 @@ class Homestead
     settings["sites"].each do |site|
       config.vm.provision "shell" do |s|
           if (site.has_key?("hhvm") && site["hhvm"])
-            s.inline = "bash /vagrant/scripts/serve-hhvm.sh $1 $2"
+            s.inline = "bash /vagrant/scripts/serve-hhvm.sh $1 \"$2\""
             s.args = [site["map"], site["to"]]
           else
-            s.inline = "bash /vagrant/scripts/serve.sh $1 $2"
+            s.inline = "bash /vagrant/scripts/serve.sh $1 $\"$2\""
             s.args = [site["map"], site["to"]]
           end
       end
@@ -66,6 +74,15 @@ class Homestead
             s.inline = "echo \"\nenv[$1] = '$2'\" >> /etc/php5/fpm/php-fpm.conf && service php5-fpm restart"
             s.args = [var["key"], var["value"]]
         end
+
+        config.vm.provision "shell" do |s|
+            s.inline = "echo \"\n#Set Homestead environment variable\nexport $1=$2\" >> /home/vagrant/.profile"
+            s.args = [var["key"], var["value"]]
+        end
+      end
+
+      config.vm.provision "shell" do |s|
+          s.inline = "service php5-fpm restart"
       end
     end
 
