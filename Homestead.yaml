@@ -4,7 +4,7 @@ memory: 2048
 cpus: 1
 
 folders:
-    - map: ~/Code
+    - map: ./Code
       to: /home/vagrant/Code
 
 sites:
