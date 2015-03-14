@@ -1,5 +1,8 @@
 class Homestead
   def Homestead.configure(config, settings)
+    # Set The VM Provider
+    ENV['VAGRANT_DEFAULT_PROVIDER'] = settings["provider"] ||= "virtualbox"
+
     # Configure The Box
     config.vm.box = "laravel/homestead"
     config.vm.hostname = "homestead"
@@ -15,6 +18,16 @@ class Homestead
       vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       vb.customize ["modifyvm", :id, "--ostype", "Ubuntu_64"]
+    end
+
+    # Configure A Few VMware Settings
+    ["vmware_fusion", "vmware_workstation"].each do |vmware|
+      config.vm.provider vmware do |v|
+        v.vmx["displayName"] = settings["name"] ||= "homestead"
+        v.vmx["memsize"] = settings["memory"] ||= 2048
+        v.vmx["numvcpus"] = settings["cpus"] ||= 1
+        v.vmx["guestOS"] = "ubuntu-64"
+      end
     end
 
     # Configure Port Forwarding To The Box
