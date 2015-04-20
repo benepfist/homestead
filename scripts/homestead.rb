@@ -3,6 +3,9 @@ class Homestead
     # Set The VM Provider
     ENV['VAGRANT_DEFAULT_PROVIDER'] = settings["provider"] ||= "virtualbox"
 
+    # Prevent TTY Errors
+    config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+
     # Configure The Box
     config.vm.box = "laravel/homestead"
     config.vm.hostname = "homestead"
