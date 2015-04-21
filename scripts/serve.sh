@@ -36,7 +36,7 @@ block="server {
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         fastcgi_intercept_errors off;
         fastcgi_buffer_size 16k;
-        fastcgi_buffers 4 16k
+        fastcgi_buffers 4 16k;
     }
 
     location ~ /\.ht {
