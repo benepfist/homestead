@@ -20,6 +20,13 @@ class Homestead
     # Configure A Private Network IP
     config.vm.network :private_network, ip: settings["ip"] ||= "192.168.10.10"
 
+    # Configure Additional Networks
+    if settings.has_key?("networks")
+      settings["networks"].each do |network|
+        config.vm.network network["type"], ip: network["ip"], bridge: network["bridge"] ||= nil
+      end
+    end
+
     # Configure A Few VirtualBox Settings
     config.vm.provider "virtualbox" do |vb|
       vb.name = settings["name"] ||= "homestead"
