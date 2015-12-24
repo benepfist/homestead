@@ -17,8 +17,8 @@ class Homestead
     config.vm.box_version = settings["version"] ||= ">= 0"
     config.vm.hostname = "homestead"
 
-    # Configure A Private Network IP
-    config.vm.network :private_network, ip: settings["ip"] ||= "192.168.10.10"
+    # Configure A Public Network IP // Win 10 does not support private_network
+    config.vm.network :public_network, ip: settings["ip"] ||= "192.168.10.10"
 
     # Configure Additional Networks
     if settings.has_key?("networks")
