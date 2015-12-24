@@ -3,15 +3,29 @@ class Homestead
     # Set The VM Provider
     ENV['VAGRANT_DEFAULT_PROVIDER'] = settings["provider"] ||= "virtualbox"
 
+    # Configure Local Variable To Access Scripts From Remote Location
+    scriptDir = File.dirname(__FILE__)
+
     # Prevent TTY Errors
     config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
+    # Allow SSH Agent Forward from The Box
+    config.ssh.forward_agent = true
+
     # Configure The Box
-    config.vm.box = "laravel/homestead"
+    config.vm.box = "laravel/homestead"    
+    config.vm.box_version = settings["version"] ||= ">= 0"
     config.vm.hostname = "homestead"
 
     # Configure A Private Network IP
     config.vm.network :private_network, ip: settings["ip"] ||= "192.168.10.10"
+
+    # Configure Additional Networks
+    if settings.has_key?("networks")
+      settings["networks"].each do |network|
+        config.vm.network network["type"], ip: network["ip"], bridge: network["bridge"] ||= nil
+      end
+    end
 
     # Configure A Few VirtualBox Settings
     config.vm.provider "virtualbox" do |vb|
@@ -43,7 +57,7 @@ class Homestead
     # Add Custom Ports From Configuration
     if settings.has_key?("ports")
       settings["ports"].each do |port|
-        config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"] ||= "tcp"
+        config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"] ||= "tcp", auto_correct: true
       end
     end
 
@@ -58,36 +72,57 @@ class Homestead
     end
 
     # Install All The Configured Nginx Sites
+    config.vm.provision "shell" do |s|
+        s.path = scriptDir + "/clear-nginx.sh"
+    end
+
     settings["sites"].each do |site|
       config.vm.provision "shell" do |s|
           if (site.has_key?("hhvm") && site["hhvm"])
             s.inline = "bash /vagrant/scripts/serve-hhvm.sh"
             s.args = [site["map"], site["to"], site["port"] ||= "80", site["ssl"] ||= "443"]
           else
-            s.inline = "bash /vagrant/scripts/serve.sh"
+            s.inline = "bash /vagrant/scripts/serve-laravel.sh"
             s.args = [site["map"], site["to"], site["port"] ||= "80", site["ssl"] ||= "443"]
           end
+      end
+
+      # Configure The Cron Schedule
+      if (site.has_key?("schedule"))
+        config.vm.provision "shell" do |s|
+          if (site["schedule"])
+            s.path = scriptDir + "/cron-schedule.sh"
+            s.args = [site["map"].tr('^A-Za-z0-9', ''), site["to"]]
+          else
+            s.inline = "rm -f /etc/cron.d/$1"
+            s.args = [site["map"].tr('^A-Za-z0-9', '')]
+          end
+        end
       end
     end
 
     # Configure All Of The Configured Databases
     settings["databases"].each do |db|
         config.vm.provision "shell" do |s|
-            s.path = "./scripts/create-mysql.sh"
+            s.path = scriptDir + "/create-mysql.sh"
             s.args = [db]
         end
 
         config.vm.provision "shell" do |s|
-            s.path = "./scripts/create-postgres.sh"
+            s.path = scriptDir + "/create-postgres.sh"
             s.args = [db]
         end
     end
 
     # Configure All Of The Server Environment Variables
+    config.vm.provision "shell" do |s|
+        s.path = scriptDir + "/clear-variables.sh"
+    end
+
     if settings.has_key?("variables")
       settings["variables"].each do |var|
         config.vm.provision "shell" do |s|
-            s.inline = "echo \"\nenv[$1] = '$2'\" >> /etc/php5/fpm/php-fpm.conf && service php5-fpm restart"
+            s.inline = "echo \"\nenv[$1] = '$2'\" >> /etc/php7.0/fpm/php-fpm.conf && service php5-fpm restart"
             s.args = [var["key"], var["value"]]
         end
 
@@ -98,7 +133,7 @@ class Homestead
       end
 
       config.vm.provision "shell" do |s|
-          s.inline = "service php5-fpm restart"
+          s.inline = "service php7.0-fpm restart"
       end
     end
 
@@ -109,14 +144,13 @@ class Homestead
 
     # Run custom script
     config.vm.provision "shell" do |s|
-      s.inline = "bash /vagrant/scripts/custom.sh"
+      s.inline = "bash " scriptDir + "/custom.sh"
     end
 
-    
     # Configure Blackfire.io
     if settings.has_key?("blackfire")
       config.vm.provision "shell" do |s|
-        s.path = "./scripts/blackfire.sh"
+        s.path = scriptDir + "/blackfire.sh"
         s.args = [
           settings["blackfire"][0]["id"],
           settings["blackfire"][0]["token"],
