@@ -9,8 +9,12 @@ class Homestead
     # Prevent TTY Errors
     config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
+    # Allow SSH Agent Forward from The Box
+    config.ssh.forward_agent = true
+
     # Configure The Box
-    config.vm.box = "laravel/homestead"
+    config.vm.box = "laravel/homestead"    
+    config.vm.box_version = settings["version"] ||= ">= 0"
     config.vm.hostname = "homestead"
 
     # Configure A Private Network IP
@@ -46,7 +50,7 @@ class Homestead
     # Add Custom Ports From Configuration
     if settings.has_key?("ports")
       settings["ports"].each do |port|
-        config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"] ||= "tcp"
+        config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"] ||= "tcp", auto_correct: true
       end
     end
 
