@@ -71,7 +71,7 @@ class Homestead
             s.inline = "bash /vagrant/scripts/serve-hhvm.sh"
             s.args = [site["map"], site["to"], site["port"] ||= "80", site["ssl"] ||= "443"]
           else
-            s.inline = "bash /vagrant/scripts/serve.sh"
+            s.inline = "bash /vagrant/scripts/serve-laravel.sh"
             s.args = [site["map"], site["to"], site["port"] ||= "80", site["ssl"] ||= "443"]
           end
       end
