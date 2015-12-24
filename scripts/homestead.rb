@@ -17,8 +17,8 @@ class Homestead
     config.vm.box_version = settings["version"] ||= ">= 0"
     config.vm.hostname = "homestead"
 
-    # Configure A Private Network IP
-    config.vm.network :private_network, ip: settings["ip"] ||= "192.168.10.10"
+    # Configure A Public Network IP // Win 10 does not support private_network
+    config.vm.network :public_network, ip: settings["ip"] ||= "192.168.10.10"
 
     # Configure Additional Networks
     if settings.has_key?("networks")
@@ -122,7 +122,7 @@ class Homestead
     if settings.has_key?("variables")
       settings["variables"].each do |var|
         config.vm.provision "shell" do |s|
-            s.inline = "echo \"\nenv[$1] = '$2'\" >> /etc/php7.0/fpm/php-fpm.conf && service php5-fpm restart"
+            s.inline = "echo \"\nenv[$1] = '$2'\" >> /etc/php/7.0/fpm/php-fpm.conf && service php5-fpm restart"
             s.args = [var["key"], var["value"]]
         end
 
