@@ -3,6 +3,9 @@ class Homestead
     # Set The VM Provider
     ENV['VAGRANT_DEFAULT_PROVIDER'] = settings["provider"] ||= "virtualbox"
 
+    # Configure Local Variable To Access Scripts From Remote Location
+    scriptDir = File.dirname(__FILE__)
+
     # Prevent TTY Errors
     config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
@@ -73,12 +76,12 @@ class Homestead
     # Configure All Of The Configured Databases
     settings["databases"].each do |db|
         config.vm.provision "shell" do |s|
-            s.path = "./scripts/create-mysql.sh"
+            s.path = scriptDir + "/create-mysql.sh"
             s.args = [db]
         end
 
         config.vm.provision "shell" do |s|
-            s.path = "./scripts/create-postgres.sh"
+            s.path = scriptDir + "/create-postgres.sh"
             s.args = [db]
         end
     end
@@ -109,14 +112,14 @@ class Homestead
 
     # Run custom script
     config.vm.provision "shell" do |s|
-      s.inline = "bash /vagrant/scripts/custom.sh"
+      s.inline = "bash " scriptDir + "/custom.sh"
     end
 
     
     # Configure Blackfire.io
     if settings.has_key?("blackfire")
       config.vm.provision "shell" do |s|
-        s.path = "./scripts/blackfire.sh"
+        s.path = scriptDir + "/blackfire.sh"
         s.args = [
           settings["blackfire"][0]["id"],
           settings["blackfire"][0]["token"],
