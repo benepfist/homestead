@@ -144,7 +144,7 @@ class Homestead
 
     # Run custom script
     config.vm.provision "shell" do |s|
-      s.inline = "bash " scriptDir + "/custom.sh"
+      s.inline = "bash " + scriptDir + "/custom.sh"
     end
 
     # Configure Blackfire.io
