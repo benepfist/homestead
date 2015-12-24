@@ -75,6 +75,19 @@ class Homestead
             s.args = [site["map"], site["to"], site["port"] ||= "80", site["ssl"] ||= "443"]
           end
       end
+
+      # Configure The Cron Schedule
+      if (site.has_key?("schedule"))
+        config.vm.provision "shell" do |s|
+          if (site["schedule"])
+            s.path = scriptDir + "/cron-schedule.sh"
+            s.args = [site["map"].tr('^A-Za-z0-9', ''), site["to"]]
+          else
+            s.inline = "rm -f /etc/cron.d/$1"
+            s.args = [site["map"].tr('^A-Za-z0-9', '')]
+          end
+        end
+      end
     end
 
     # Configure All Of The Configured Databases
