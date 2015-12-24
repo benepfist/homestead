@@ -25,5 +25,5 @@ echo "$client" > "/home/vagrant/.blackfire.ini"
 # Disable xdebug to prevent conflict
 php5dismod xdebug
 service hhvm restart
-service php5-fpm restart
+service php7.0-fpm restart
 service blackfire-agent restart
