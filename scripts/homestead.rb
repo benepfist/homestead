@@ -142,9 +142,9 @@ class Homestead
       s.inline = "/usr/local/bin/composer self-update"
     end
 
-    # Run custom script
+    # Install Mailhog script
     config.vm.provision "shell" do |s|
-      s.path = scriptDir + "/custom.sh"
+      s.path = scriptDir + "/mailhog.sh"
     end
 
     # Configure Blackfire.io
