@@ -142,6 +142,11 @@ class Homestead
       s.inline = "/usr/local/bin/composer self-update"
     end
 
+    # Install Percona Xtrabackup
+    config.vm.provision "shell" do |s|
+      s.inline = scriptDir + "/xtrabackup.sh"
+    end
+
     # Install Mailhog script
     config.vm.provision "shell" do |s|
       s.path = scriptDir + "/mailhog.sh"
